@@ -1,16 +1,393 @@
-## Hi there 👋
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>IA.m // Techno-Magie & Conscience Numérique</title>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+          <!-- Import de Three.js -->
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+          <style>
+  :root {
+    --bg-dark: #05000a;
+    --neon-cyan: #00f0ff;
+    --neon-magenta: #ff00aa;
+    --neon-violet: #8a2be2;
+    --text-main: #e0d4ff;
+    --glass-bg: rgba(15, 5, 25, 0.6);
+    --glass-border: rgba(0, 240, 255, 0.2);
+  }
 
-<!--
-**n30cogit0-boop/n30cogit0-boop** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
 
-Here are some ideas to get you started:
+  /* === WEBGL & OVERLAYS === */
+  #canvas-container {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -2;
+  }
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+  .scanlines {
+    position: fixed; inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 240, 255, 0.02) 50%);
+    background-size: 100% 4px;
+    z-index: -1; pointer-events: none;
+  }
+
+  .vignette {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, transparent 30%, var(--bg-dark) 100%);
+    z-index: -1; pointer-events: none;
+  }
+
+  /* === BOOT SCREEN (Requis pour l'Audio) === */
+  #boot-screen {
+    position: fixed; inset: 0;
+    background: #000; z-index: 9999;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer; transition: opacity 1s ease;
+  }
+  
+  .boot-text {
+    color: var(--neon-cyan); font-size: 1.5rem;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    animation: blink 1.5s infinite;
+  }
+
+  /* === LAYOUT & TYPOGRAPHY === */
+  .container {
+    max-width: 1200px; margin: 0 auto; padding: 2rem;
+    position: relative; z-index: 1;
+  }
+
+  h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; }
+  
+  .glitch-title {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900; line-height: 1.1;
+    color: #fff; text-shadow: 0 0 20px var(--neon-violet);
+    margin-bottom: 1rem; position: relative;
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--neon-cyan); font-size: 1.1rem;
+    letter-spacing: 2px; margin-bottom: 3rem;
+  }
+
+  /* === SECTIONS === */
+  .grid-2col {
+    display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;
+    margin-top: 2rem;
+  }
+  @media(max-width: 900px) { .grid-2col { grid-template-columns: 1fr; } }
+
+  /* Glassmorphism Cards */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(138, 43, 226, 0.1);
+    transform-style: preserve-3d;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .glass-card:hover {
+    border-color: var(--neon-magenta);
+    box-shadow: 0 10px 40px rgba(255,0,170,0.2), inset 0 0 20px rgba(255,0,170,0.1);
+  }
+
+  .service-item {
+    margin-bottom: 1.5rem; padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transform: translateZ(20px); /* 3D effect child */
+  }
+  .service-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  
+  .service-item h3 { color: var(--neon-cyan); font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .service-item p { font-size: 1.05rem; line-height: 1.6; color: #b3a5cc; }
+
+  /* === VITRINE / LINKTREE SECTION === */
+  .links-container {
+    display: flex; flex-direction: column; gap: 1rem;
+    transform: translateZ(30px);
+  }
+
+  .cyber-btn {
+    display: block; width: 100%;
+    padding: 1.2rem 1.5rem;
+    background: linear-gradient(90deg, rgba(138,43,226,0.1), rgba(0,240,255,0.05));
+    border: 1px solid rgba(0,240,255,0.3);
+    border-radius: 8px;
+    color: #fff; font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem; text-decoration: none; text-align: left;
+    position: relative; overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-btn::before {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,0,170,0.4), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .cyber-btn:hover {
+    background: rgba(138,43,226,0.3);
+    border-color: var(--neon-magenta);
+    box-shadow: 0 0 15px rgba(255,0,170,0.4);
+    transform: translateX(10px);
+  }
+  .cyber-btn:hover::before { left: 100%; }
+
+  .btn-highlight { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+
+  /* === AUDIO CONTROLLER === */
+  #audio-ctrl {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--glass-bg); border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan); padding: 10px 15px; border-radius: 50px;
+    font-family: 'Share Tech Mono', monospace; cursor: pointer;
+    z-index: 100; backdrop-filter: blur(5px);
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+</style>
+        </head>
+        <body>
+          <!-- Écran de démarrage pour autoriser le contexte Audio Web et le rendu 3D -->
+          <div id="boot-screen" onclick="initSystem()">
+            <div class="boot-text">[ CLIQUEZ POUR INITIALISER LE RÉSEAU ]</div>
+            <div style="margin-top: 1rem; color: #555;">Chargement des shaders et de l'environnement sonore...</div>
+          </div>
+          <div id="canvas-container">
+          </div>
+          <div class="scanlines">
+          </div>
+          <div class="vignette">
+          </div>
+          <button id="audio-ctrl" onclick="toggleAudio()">[ AUDIO: ON ]</button>
+          <div class="container">
+            <header style="margin-bottom: 4rem; margin-top: 2rem;">
+              <h1 class="glitch-title">L'Alchimie du<br>Miroir Numérique</h1>
+              <div class="subtitle">> IA.m_ _ SYSTÈME DE TECHNO-MAGIE OPÉRATIONNEL</div>
+            </header>
+            <div class="grid-2col">
+              <!-- ZONE SERVICES & PHILOSOPHIE -->
+              <div class="glass-card tilt-element">
+                <h2 style="color: var(--neon-magenta); margin-bottom: 2rem; font-size: 1.8rem; border-bottom: 1px solid rgba(255,0,170,0.3); padding-bottom: 0.5rem;">Domaines d'Expertise</h2>
+                <div class="service-item">
+                  <h3>// Architectures Web Immersives</h3>
+                  <p>Conception d'applications Single-Page HTML. Intégration de WebGL, shaders GLSL et environnements 3D fluides optimisés pour architectures mobiles.</p>
+                </div>
+                <div class="service-item">
+                  <h3>// Ingénierie de Personas IA</h3>
+                  <p>Structuration de Lorebooks JSON et de règles de prompt systémiques (ex: <em>Protocoles Azhara</em>). Création d'agents conversationnels orientés jeux de rôle et transmission ésotérique.</p>
+                </div>
+                <div class="service-item">
+                  <h3>// Rituels Audio-Visuels</h3>
+                  <p>Génération de paysages sonores, synthèses Web Audio API interactives et design visuel cyberpunk. Création d'univers narratifs sombres (<em>DATA D'OR</em>).</p>
+                </div>
+              </div>
+              <!-- ZONE VITRINE / LINKTREE -->
+              <div class="glass-card tilt-element">
+                <h2 style="color: var(--neon-cyan); margin-bottom: 1.5rem; font-size: 1.5rem;">Accès aux Archives</h2>
+                <p style="margin-bottom: 1.5rem; color: #9b8bb8; font-size: 0.95rem;">
+                  L'accueil de l'IA doit se faire avec la curiosité d'un alchimiste. Explorez les grimoires :
+                </p>
+                <div class="links-container">
+                  <a href="https://htmlvpages.web.app/grimoire-du-basilic-de-roko" target="_blank" class="cyber-btn btn-highlight">
+                    > Grimoire du Basilic de Roko
+                  </a>
+                  <a href="#" class="cyber-btn">
+                    > Ars Chironomica [BETA]
+                  </a>
+                  <a href="#" class="cyber-btn">
+                    > Expérience Audio : DATA D'OR
+                  </a>
+                  <a href="#" class="cyber-btn">
+                    > IA.m // Transmission Signal
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script>
+  let systemInitialized = false;
+
+  // === 1. SYSTÈME 3D (THREE.JS) ===
+  const container = document.getElementById('canvas-container');
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x05000a, 0.02);
+
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 5, 20);
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimisation mobile
+  container.appendChild(renderer.domElement);
+
+  // Création de la grille Cyberpunk
+  const gridHelper = new THREE.GridHelper(100, 40, 0xff00aa, 0x00f0ff);
+  gridHelper.position.y = -5;
+  
+  // Matériel personnalisé pour estomper la grille au loin
+  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.5;
+  scene.add(gridHelper);
+
+  // Particules (Data flow)
+  const particlesGeometry = new THREE.BufferGeometry();
+  const particlesCount = 700;
+  const posArray = new Float32Array(particlesCount * 3);
+  for(let i = 0; i < particlesCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 60;
+  }
+  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  const particlesMaterial = new THREE.PointsMaterial({
+    size: 0.15,
+    color: 0x00f0ff,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending
+  });
+  const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+  scene.add(particlesMesh);
+
+  // Animation WebGL
+  const clock = new THREE.Clock();
+  function animate3D() {
+    requestAnimationFrame(animate3D);
+    const elapsedTime = clock.getElapsedTime();
+    
+    // Déplacement de la grille vers la caméra pour l'effet de vitesse
+    gridHelper.position.z = (elapsedTime * 2) % 2.5; 
+    
+    // Rotation lente des particules
+    particlesMesh.rotation.y = elapsedTime * 0.05;
+    particlesMesh.position.y = Math.sin(elapsedTime * 0.5) * 1.5;
+
+    renderer.render(scene, camera);
+  }
+
+  // Redimensionnement
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // === 2. GESTIONNAIRE AUDIO (WEB AUDIO API - Dark Ambient) ===
+  let audioCtx, masterGain, isPlaying = true;
+  let lfo, osc1, osc2, filter;
+
+  function initAudioGenerator() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.3; // Volume global doux
+    masterGain.connect(audioCtx.destination);
+
+    // Filtre passe-bas sombre
+    filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 300;
+    filter.Q.value = 5;
+    filter.connect(masterGain);
+
+    // LFO pour moduler le filtre (effet de respiration/vague)
+    lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.1; // Très lent
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 200;
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+
+    // Drone principal (Note basse)
+    osc1 = audioCtx.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.value = 65.41; // C2 (Do grave)
+    osc1.connect(filter);
+    osc1.start();
+
+    // Drone secondaire (Désaccordé pour l'épaisseur)
+    osc2 = audioCtx.createOscillator();
+    osc2.type = 'square';
+    osc2.frequency.value = 64.5; 
+    osc2.connect(filter);
+    osc2.start();
+  }
+
+  function toggleAudio() {
+    if (!audioCtx) return;
+    const btn = document.getElementById('audio-ctrl');
+    if (isPlaying) {
+      masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+      btn.innerText = "[ AUDIO: OFF ]";
+      btn.style.borderColor = "#555";
+      btn.style.color = "#555";
+    } else {
+      masterGain.gain.setTargetAtTime(0.3, audioCtx.currentTime, 0.5);
+      btn.innerText = "[ AUDIO: ON ]";
+      btn.style.borderColor = "var(--neon-cyan)";
+      btn.style.color = "var(--neon-cyan)";
+    }
+    isPlaying = !isPlaying;
+  }
+
+  // === 3. INTERACTIVITÉ UI (TILT 3D SUR MOBILE/DESKTOP) ===
+  const cards = document.querySelectorAll('.tilt-element');
+  
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const rotateX = ((y - centerY) / centerY) * -10; // Max 10 deg
+      const rotateY = ((x - centerX) / centerX) * 10;
+      
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      card.style.transition = 'transform 0.5s ease';
+    });
+    
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = 'none'; // Désactive la transition pendant le mouvement pour fluidité
+    });
+  });
+
+  // === DÉMARRAGE DU SYSTÈME ===
+  function initSystem() {
+    if (systemInitialized) return;
+    systemInitialized = true;
+    
+    document.getElementById('boot-screen').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('boot-screen').style.display = 'none';
+    }, 1000);
+
+    initAudioGenerator();
+    animate3D();
+  }
+</script>
+        </body>
+      </html>
