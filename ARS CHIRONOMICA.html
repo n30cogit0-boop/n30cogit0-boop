@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ARS CHIRONOMICA - Le Grand Traité des Sceaux Corporels</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+              <style>
+        :root {
+            --bg-color: #050505;
+            --text-main: #d4c4a8;
+            --text-muted: #8c7e6a;
+            --gold: #d4af37;
+            --gold-dim: rgba(212, 175, 55, 0.3);
+            --ethereal-blue: rgba(75, 0, 130, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Canvas Background for Procedural Particles */
+        #ether-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: var(--gold);
+            letter-spacing: 4px;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px var(--gold-dim);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            color: var(--gold);
+            margin: 4rem 0 2rem 0;
+            border-bottom: 1px solid var(--gold-dim);
+            padding-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+            color: #fff;
+            margin: 2rem 0 1rem 0;
+            text-align: left;
+            border-left: 3px solid var(--gold);
+            padding-left: 1rem;
+        }
+
+        p, ul {
+            margin-bottom: 1.5rem;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        li::before {
+            content: "✦";
+            color: var(--gold);
+            position: absolute;
+            left: -1.5rem;
+            top: 2px;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        em {
+            color: var(--gold);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero h3 {
+            border: none;
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-top: 0;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 1.5rem;
+            color: var(--gold);
+            max-width: 700px;
+            margin-top: 3rem;
+            border-top: 1px solid var(--gold-dim);
+            border-bottom: 1px solid var(--gold-dim);
+            padding: 1.5rem 0;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(10px); }
+            100% { opacity: 0.3; transform: translateY(0); }
+        }
+
+        /* Scroll Reveal Animation Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Sceaux Cards */
+        .seal-card {
+            background: rgba(15, 15, 15, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .seal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            transform: scaleX(0);
+            transition: transform 0.6s ease;
+        }
+
+        .seal-card:hover {
+            border-color: var(--gold-dim);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px var(--ethereal-blue);
+            transform: translateY(-5px);
+        }
+
+        .seal-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .chapter {
+            margin-bottom: 6rem;
+        }
+
+        .epilogue {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-muted);
+            margin: 6rem 0;
+            padding-top: 3rem;
+            border-top: 1px dashed var(--gold-dim);
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.8rem; }
+            .hero { padding: 0 1rem; }
+            .quote { font-size: 1.2rem; }
+        }
+    </style>
+            </head>
+            <body>
+              <!-- Canvas for interactive background effects -->
+              <canvas id="ether-canvas">
+              </canvas>
+              <div class="container">
+                <section class="hero">
+                  <h1>ARS CHIRONOMICA</h1>
+                  <h3>Le Grand Traité des Sceaux Corporels et de la Magie Tissée</h3>
+                  <div class="quote reveal">
+                    "L'univers n'est pas façonné par le Verbe seul. Le Verbe commande, mais c'est la Main qui scelle. Apprends à plier tes doigts, et tu plieras la trame de l'Éther."
+                  </div>
+                  <div class="scroll-indicator">Descendre dans les Abysses</div>
+                </section>
+                <section class="chapter reveal">
+                  <h2>PRÉFACE : L'Anatomie Occulte de la Main</h2>
+                  <p>Écoute attentivement, mortel. Avant de chercher à plier l'éther à ta volonté, tu dois comprendre l'instrument qui te servira de pont entre la densité de ton monde et le feu sans fumée du mien. Nombreux sont ceux qui hurlent des incantations dans le vide, oubliant que la gorge n'est que la source du son. C'est la main qui sculpte la résonance. J'ai vu les mages de l'Antiquité lier des armées par un simple mouvement de poignet ; je te transmettrai cette même grammaire silencieuse.</p>
+                  <p>La main humaine n'est pas un simple outil de chair et d'os ; c'est un microcosme parfait, une réplique miniaturisée de l'architecture cosmique.</p>
+                  <div class="seal-card reveal">
+                    <h3>1. Le Microcosme Digital et l'Arbre de Vie</h3>
+                    <p>Les kabbalistes ont depuis longtemps compris que l'Arbre de Vie se projette sur le corps. Ta main est le reflet de cette séphirothique. Le pouce, pilier de la volonté absolue, correspond à Kether (la Couronne). L'index pointe avec l'autorité rigoureuse de Geburah (la Rigueur), tandis que le majeur s'équilibre dans l'harmonie de Tiphereth (la Beauté). Ton annulaire attire les énergies de Netzach (la Victoire et l'émotion), et ton auriculaire, récepteur subtil, capte les murmures de Hod (la Splendeur et l'intellect). En joignant ou en séparant ces phalanges, tu ne fais pas que bouger de la chair : tu connectes ou court-circuites des sphères planétaires entières.</p>
+                  </div>
+                  <div class="seal-card reveal">
+                    <h3>2. Les Lignes de Force (Méridiens de l'Éther)</h3>
+                    <p>Sous ta peau serpentent des fleuves invisibles. Le prana, le vril, l'essence vitale — peu importe le nom que ta tradition lui donne — afflue depuis ton centre de pouvoir, traverse tes épaules, s'accélère dans les coudes, et se concentre dans les poignets avant d'être projeté par tes ongles. Les sceaux manuels opèrent comme des vannes sur un barrage énergétique. Une tension spécifique dans la paume modifie la fréquence vibratoire du courant, le transformant de feu destructeur en eau guérisseuse.</p>
+                  </div>
+                  <div class="seal-card reveal">
+                    <h3>3. L'Outil de la Volonté</h3>
+                    <p>La Magick opérative exige une synchronisation absolue. Une intention mentale pure est inefficace si elle n'est pas ancrée dans le monde matériel par un ancrage physique. Le geste est l'enclume sur laquelle la pensée frappe pour forger la réalité. Lorsque tu tisseras ces sceaux, tes muscles devront trembler sous la tension de l'énergie retenue. Si tes doigts sont mous, ta magie sera stérile.</p>
+                  </div>
+                </section>
+                <section class="chapter reveal">
+                  <h2>LIVRE I : Les Fondations Telluriques (Ancrage & Protection)</h2>
+                  <p>Avant d'invoquer les tempêtes, tu dois apprendre à devenir la montagne. Ce premier livre contient l'art de préparer ton vaisseau charnel à recevoir, contenir et dissiper des fréquences massives. Ignorer ces fondements, c'est inviter la folie, la combustion spontanée de tes méridiens, ou la possession par les forces que tu cherches à dominer.</p>
+                  <div class="seal-card reveal">
+                    <h3>I. Fundamentum Gravitatis (La Fondation de la Gravité)</h3>
+                    <p>C'est le sceau de l'ancre. Il est utilisé lorsqu'un rituel échappe à ton contrôle, ou pour évacuer dans le sol une surcharge d'énergie gnostique ou astrale qui menacerait de brûler ton système nerveux.</p>
+                    <ul>
+                      <li>
+                        <strong>La Position :</strong> Assis ou debout. Frappe brutalement tes mains à plat contre tes cuisses, contre la roche ou la terre. Tes doigts doivent être écartés au maximum, tendus à l'extrême comme des griffes cherchant à s'enraciner. Les paumes sont pressées avec une force telle que la chair en blanchit.</li>
+                        <li>
+                          <strong>La Visualisation :</strong> Ressens le poids de ton propre corps se multiplier par dix. Imagine que chaque bout de doigt s'allonge en d'épaisses racines d'obsidienne noire qui perforent le sol et plongent vers le noyau en fusion de la Terre.</li>
+                          <li>
+                            <strong>L'Application :</strong> Lors d'une évocation goétique où l'entité tente de siphonner ton aura, frappe le <em>Fundamentum Gravitatis</em>. L'énergie hostile sera instantanément aspirée et neutralisée par la masse tellurique.</li>
+                          </ul>
+                        </div>
+                        <div class="seal-card reveal">
+                          <h3>II. Custodia Potentiae (La Garde de la Puissance)</h3>
+                          <p>L'énergie magique, tout comme l'air comprimé, gagne en puissance lorsqu'elle est confinée. Ce sceau est un barrage qui force ton feu intérieur à s'accumuler avant d'être relâché lors d'une projection magick.</p>
+                          <ul>
+                            <li>
+                              <strong>La Position :</strong> Croise les avant-bras fermement sur ton plexus solaire (le centre de tes côtes). Tes mains se ferment en poings extrêmement serrés, les pouces verrouillant les index. Rentre ces poings sous tes aisselles opposées. Baisse le menton.</li>
+                              <li>
+                                <strong>La Respiration :</strong> Inspire profondément par le nez jusqu'à ce que tes poumons brûlent, puis bloque la respiration. Garde le diaphragme contracté.</li>
+                                <li>
+                                  <strong>La Visualisation :</strong> Visualise ton corps comme une sphère de fer hermétique. Au centre de ta poitrine, une étoile naine blanche pulse, grossit et s'échauffe à mesure que la pression augmente, incapable de s'échapper.</li>
+                                  <li>
+                                    <strong>L'Application :</strong> Maintiens cette position vibrante pendant les longues incantations préparatoires. Relâche-la violemment, en expulsant l'air et en projetant tes bras vers l'avant, pour déclencher un sortilège destructeur ou briser un sceau récalcitrant.</li>
+                                  </ul>
+                                </div>
+                                <div class="seal-card reveal">
+                                  <h3>III. Murus Silentii (Le Mur du Silence)</h3>
+                                  <p>Dans les abysses, d'innombrables parasites astraux et égrégores se nourrissent de l'attention mentale. Ce sceau crée une cage de Faraday psychique. Il est indispensable pour bloquer la clairaudience indésirable ou repousser une intrusion télépathique.</p>
+                                  <ul>
+                                    <li>
+                                      <strong>La Position :</strong> Lève la main dominante. L'index et le majeur sont fermement joints et rigides, reposant verticalement sur tes lèvres closes. Le pouce s'écrase sur l'annulaire et l'auriculaire, les clouant contre le centre de la paume. Le coude est collé au torse.</li>
+                                      <li>
+                                        <strong>La Visualisation :</strong> Imagine que le contact de tes doigts sur tes lèvres génère un mur de verre poli et impénétrable qui s'étend autour de ton crâne. Toute voix, humaine ou démoniaque, vient s'écraser contre cette surface dans un silence absolu.</li>
+                                        <li>
+                                          <strong>L'Application :</strong> Si tu arpentes un lieu chargé en mémoires violentes, ou si, lors d'une transe, des murmures tentent de parasiter tes propres pensées, scelle le <em>Murus Silentii</em>. Aucune suggestion occulte ne pourra pénétrer la forteresse de ton esprit tant que ce sceau sera maintenu.</li>
+                                        </ul>
+                                      </div>
+                                      <p class="epilogue reveal">*(Fin du Livre I. Maîtrise d'abord la Terre, et je t'enseignerai alors comment ouvrir les Cieux dans le Livre II).*</p>
+                                    </section>
+                                    <section class="chapter reveal">
+                                      <h2>LIVRE II : La Gnose et la Canalisation (Réception)</h2>
+                                      <p>Maintenant que ton vaisseau de chair est solidement ancré dans la glaise de ton monde, tu peux oser lever les yeux vers le mien. La magie n'est pas seulement l'art d'imposer sa volonté ; c'est aussi celui de se laisser traverser par des vérités qui pulvériseraient un esprit non préparé. La Gnose ne s'étudie pas dans les livres empoussiérés, elle se télécharge depuis l'Éther. Ce deuxième livre t'enseigne à modeler tes mains pour en faire des antennes capables de capter les fréquences de l'Akasha et les murmures des sphères supérieures.</p>
+                                      <div class="seal-card reveal">
+                                        <h3>I. Digiti Divini (Les Doigts Divins)</h3>
+                                        <p>Ce sceau transforme ta structure physique en un paratonnerre astral. Il est la clé pour puiser dans la source même de l'inspiration cosmique ou pour établir un canal direct avec une intelligence supérieure.</p>
+                                        <ul>
+                                          <li>
+                                            <strong>La Position :</strong> Lève ton bras récepteur (le gauche, selon les traditions de l'hémisphère nord) de sorte que le coude soit plié à angle droit. L'index et le majeur sont dressés vers le zénith, rigides et parfaitement alignés. Le pouce maintient délicatement l'annulaire et l'auriculaire repliés contre la paume. Le poignet doit rester d'une souplesse absolue, comme la tige d'un roseau.</li>
+                                            <li>
+                                              <strong>La Visualisation :</strong> Imagine que tes deux doigts dressés s'allongent spirituellement au-delà de l'atmosphère, perçant les nuages pour aller toucher la lisière des étoiles. Ressens une goutte de lumière liquide, lourde et glacée, se déposer sur la pulpe de tes doigts et couler le long de ton bras jusqu'à ton crâne.</li>
+                                              <li>
+                                                <strong>L'Application :</strong> Utilise ce sceau lorsque tu cherches la solution à un paradoxe occulte, ou pour canaliser le Verbe d'une entité lors d'une séance d'écriture automatique. Ne le maintiens jamais sous un ciel d'orage, au risque d'attirer des forces électriques et spirituelles fulgurantes.</li>
+                                              </ul>
+                                            </div>
+                                            <div class="seal-card reveal">
+                                              <h3>II. Calyx Receptivus (Le Calice Réceptif)</h3>
+                                              <p>La révélation gnostique est brutale. Le <em>Calyx Receptivus</em> prépare ton architecture subtile à accueillir une vision prophétique sans que ton esprit ne se fracture sous la pression de l'illumination.</p>
+                                              <ul>
+                                                <li>
+                                                  <strong>La Position :</strong> Joins les tranches de tes mains au niveau de ton front, juste au-dessus de l'arête du nez (devant le Troisième Œil). Laisse tes doigts s'épanouir vers le haut et l'extérieur, courbés avec une grâce tendue, formant la coupe d'un calice d'argent. Les paumes sont offertes au ciel.</li>
+                                                  <li>
+                                                    <strong>La Respiration :</strong> Une respiration ventrale, lente, presque imperceptible. Chaque inspiration doit creuser le vide à l'intérieur de ta boîte crânienne.</li>
+                                                    <li>
+                                                      <strong>La Visualisation :</strong> Visualise ton esprit comme une eau noire et parfaitement immobile à l'intérieur de cette coupe. Attends que la connaissance, sous la forme d'un nectar de feu stellaire, vienne remplir ce vide.</li>
+                                                      <li>
+                                                        <strong>L'Application :</strong> À utiliser lors des rituels d'incubation ou avant d'utiliser des enthéogènes spirituels. Si tu sens la démence s'approcher lors d'une vision trop vaste, ferme immédiatement le calice en croisant les doigts et reviens au <em>Fundamentum Gravitatis</em> du Livre I.</li>
+                                                      </ul>
+                                                    </div>
+                                                    <div class="seal-card reveal">
+                                                      <h3>III. Acus Lucis (L'Aiguille de Lumière)</h3>
+                                                      <p>Le monde de la matière n'est qu'une illusion, le voile de Maya. Ce sceau modifie la focalisation de ton cristallin spirituel, te permettant de voir l'invisible, de lire les auras et de percer les mensonges des esprits trompeurs.</p>
+                                                      <ul>
+                                                        <li>
+                                                          <strong>La Position :</strong> Place tes mains à hauteur de tes yeux. Joins les bouts de tes deux index pour qu'ils pointent droit devant toi. Joins également les bouts de tes deux pouces vers le bas. Tu as maintenant formé un losange ou un "œil" triangulaire. Les autres doigts sont repliés en poings lâches.</li>
+                                                          <li>
+                                                            <strong>La Visualisation :</strong> Regarde <em>à travers</em> le losange formé par tes doigts. Concentre ton intention pour que l'espace au centre de ce losange devienne une lentille de cristal purificateur.</li>
+                                                            <li>
+                                                              <strong>L'Application :</strong> Balaye une pièce à travers cette lentille digitale pour détecter la présence de larves astrales, de résidus magiques ou pour contempler la véritable nature d'une entité qui se présenterait sous une forme flatteuse.</li>
+                                                            </ul>
+                                                          </div>
+                                                        </section>
+                                                        <section class="chapter reveal">
+                                                          <h2>LIVRE III : La Magick Opérative et l'Évocation (Goétie & Commandement)</h2>
+                                                          <p>Nous quittons ici le royaume de la contemplation pour entrer dans celui de la domination. Ma race, née du feu sans fumée, connaît bien ces sceaux, car ce sont ceux que vos prêtres et vos rois sorciers ont utilisés pour nous contraindre dans des lampes, des bouteilles ou des cercles de sel. Ne te trompe pas : utiliser ces gestes exige une Volonté d'acier. Si ton esprit vacille d'un millimètre en exécutant ces arcanes, c'est l'entité invoquée qui prendra le commandement.</p>
+                                                          <div class="seal-card reveal">
+                                                            <h3>I. Aperire Portam (L'Ouverture du Portail)</h3>
+                                                            <p>Aucun esprit ne vient à toi par simple politesse ; il faut déchirer l'étoffe de la réalité pour lui ménager un passage depuis le plan astral ou l'Abysse. Ce geste est l'effraction cosmique par excellence.</p>
+                                                            <ul>
+                                                              <li>
+                                                                <strong>La Position :</strong> Étends les bras devant toi, les paumes jointes, doigts serrés, comme une lame plongeant dans l'air. D'un mouvement d'une violence extrême et contrôlée, tourne les paumes vers l'extérieur et écarte violemment les bras, comme si tu écartelais la cage thoracique d'une bête ou que tu déchirais une lourde tapisserie invisible.</li>
+                                                                <li>
+                                                                  <strong>La Visualisation :</strong> Lors du geste de déchirure, visualise l'espace devant toi se fendre dans un crépitement d'ozone. Derrière la fente, imagine l'obscurité tourbillonnante du plan d'où l'entité doit émerger.</li>
+                                                                  <li>
+                                                                    <strong>L'Application :</strong> C'est le geste inaugural de toute évocation goétique ou invocation nécromantique. Il s'accompagne toujours de la vibration du nom barbare de l'entité appelée. Le portail doit impérativement être "refermé" par un mouvement inverse à la fin du rituel.</li>
+                                                                  </ul>
+                                                                </div>
+                                                                <div class="seal-card reveal">
+                                                                  <h3>II. Catena Imperii (La Chaîne de Commandement)</h3>
+                                                                  <p>C'est le sceau de la tyrannie spirituelle, l'outil du démiurge et de l'exorciste. Il lie la volonté d'une force extérieure à la tienne.</p>
+                                                                  <ul>
+                                                                    <li>
+                                                                      <strong>La Position :</strong> Projette ta main dominante (la main projetante, généralement la droite) vers la cible de ton rituel, le bras tendu à l'extrême. Le pouce et l'index se rejoignent pour former un anneau parfait et inflexible. Le majeur, l'annulaire et l'auriculaire sont dressés vers le haut, raides, écartés et recourbés comme les serres d'un rapace fonçant sur sa proie.</li>
+                                                                      <li>
+                                                                        <strong>La Visualisation :</strong> L'anneau formé par ton pouce et ton index est un maillon d'une chaîne de fer incandescent qui s'enroule instantanément autour de la "gorge" énergétique de l'esprit, de la maladie ou de la force que tu veux soumettre.</li>
+                                                                        <li>
+                                                                          <strong>L'Application :</strong> À utiliser au moment critique de la contrainte, lorsque l'esprit goétique refuse de se manifester ou d'obéir. Ce geste s'utilise également pour imposer une suggestion irrépressible à un esprit faible, l'anneau symbolisant la prison de ton décret.</li>
+                                                                        </ul>
+                                                                      </div>
+                                                                      <div class="seal-card reveal">
+                                                                        <h3>III. Ignis Fatuus (Le Feu Follet)</h3>
+                                                                        <p>Toute grande œuvre alchimique ou magique nécessite une étincelle primordiale pour déclencher la réaction en chaîne de la manifestation. Ce sceau est le détonateur de ta Volonté.</p>
+                                                                        <ul>
+                                                                          <li>
+                                                                            <strong>La Position :</strong> C'est un mouvement sec, un claquement de doigts altéré. Place la pulpe de ton majeur fermement contre celle de ton pouce de la main gauche (la main de l'occulte). Fais glisser le majeur violemment pour qu'il vienne percuter la base de ton pouce en produisant un son clair et sec.</li>
+                                                                            <li>
+                                                                              <strong>La Visualisation :</strong> Au moment précis du claquement, visualise une étincelle de plasma violet vif jaillir entre tes doigts, se détachant pour aller frapper le centre de ton rituel (un sceau tracé au sol, une bougie, ou une amulette).</li>
+                                                                              <li>
+                                                                                <strong>L'Application :</strong> Le <em>Ignis Fatuus</em> agit comme un point d'exclamation métaphysique. Il s'exécute à la fin exacte d'une incantation pour relâcher l'énergie accumulée, ou pour attirer l'attention fulgurante d'un esprit distrait. C'est le "Fiat Lux" de la sorcellerie de brousse comme de la haute Magick.</li>
+                                                                              </ul>
+                                                                            </div>
+                                                                            <p class="epilogue reveal">Finis Coronat Opus.</p>
+                                                                          </section>
+                                                                        </div>
+                                                                        <script>
+        // --- 1. Intersection Observer for Scroll Reveal Animations ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Reveal only once
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(element => {
+            observer.observe(element);
+        });
+
+        // --- 2. Interactive Procedural Particle System (Ether Canvas) ---
+        // Reacts to gesture/mouse velocity to weave digital magic
+        const canvas = document.getElementById('ether-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        let pointer = { x: null, y: null, vx: 0, vy: 0 };
+        let lastPointer = { x: null, y: null };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, vx, vy) {
+                this.x = x;
+                this.y = y;
+                // Add a bit of randomness to the velocity track
+                this.vx = (vx * 0.1) + (Math.random() - 0.5) * 2;
+                this.vy = (vy * 0.1) + (Math.random() - 0.5) * 2;
+                this.life = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.size = Math.random() * 3 + 1;
+                this.color = Math.random() > 0.5 ? 'rgba(212, 175, 55, ' : 'rgba(75, 0, 130, '; // Gold or Purple
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + this.life + ')';
+                ctx.fill();
+            }
+        }
+
+        function trackVelocity(x, y) {
+            lastPointer.x = pointer.x;
+            lastPointer.y = pointer.y;
+            pointer.x = x;
+            pointer.y = y;
+
+            if (lastPointer.x !== null) {
+                pointer.vx = pointer.x - lastPointer.x;
+                pointer.vy = pointer.y - lastPointer.y;
+                
+                let speed = Math.sqrt(pointer.vx**2 + pointer.vy**2);
+                
+                // Spawn particles based on movement velocity
+                if (speed > 1) {
+                    let spawnCount = Math.min(Math.floor(speed / 3), 10);
+                    for (let i = 0; i < spawnCount; i++) {
+                        particles.push(new Particle(pointer.x, pointer.y, pointer.vx, pointer.vy));
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => trackVelocity(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => trackVelocity(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+        
+        // Reset last pointer on end of interaction to prevent long lines
+        window.addEventListener('touchend', () => { pointer.x = null; lastPointer.x = null; });
+        window.addEventListener('mouseout', () => { pointer.x = null; lastPointer.x = null; });
+
+        function animate() {
+            // Ethereal trailing effect instead of clearing the whole canvas
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.update();
+                p.draw();
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+                                                                      </body>
+                                                                    </html>
